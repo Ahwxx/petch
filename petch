@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+# colors
+
+GREEN="\x1B[32m"
+YELLOW="\x1B[33m"
+GOLD="\x1B[93m"
+BLUE="\x1B[34m"
+CYAN="\033[36m"
+RED="\033[1;31m"
+WHITE="\x1B[37m"
+BOLD="\x1B[1m"
+RESET="\x1B[0m"
+
+block="▃▃▃ "
+
+# greeting
+greet="Hello! Thanks for using petch! Edit the config by editing /usr/bin/petch."
+
+# variables
+
+title=$USER
+hostname=$HOSTNAME
+user=$(whoami)
+os=$(grep -m1 "NAME=" < /etc/os-release | cut -d '"' -f 2)
+uptime=$(uptime -p | sed 's/up//')
+font=$(fc-match | sed 's/\..*//g')
+shell=$(basename $SHELL)
+memory=$(free --mega | awk 'NR == 2 { print $3" / "$2" MB" }')
+wm=${WAYLAND_DISPLAY:-$(xprop -id "$(xprop -root _NET_SUPPORTING_WM_CHECK | cut -d' ' -f5)" _NET_WM_NAME | cut -d'"' -f2)}
+packages=$(pacman -Q | wc -l)
+screen=$(xrandr | grep '*')
+
+info() {
+    cat <<EOF
+    ${BOLD}${CYAN}$title${RESET}${BOLD}${RED}@${BOLD}${GREEN}$hostname${RESET} 
+    ${BOLD}${GREEN}user   ${RESET} $user
+    ${BOLD}${GOLD}os     ${RESET} $os
+    ${BOLD}${RED}sh     ${RESET} $shell
+    ${BOLD}${YELLOW}font   ${RESET} $font
+    ${BOLD}${BLUE}wm     ${RESET} $wm
+    ${BOLD}${CYAN}mem    ${RESET} $memory
+    ${BOLD}${WHITE}up    ${RESET} $uptime
+    ${BOLD}${GREEN}pkgs   ${RESET} $packages
+    ${BOLD}${GOLD}res ${RESET} $screen
+    ${BOLD}${RED}ext    ${RESET} $greet
+                   ${BOLD}${GREEN} $block ${RESET} ${BOLD}${GOLD} $block ${RESET} ${BOLD}${RED} $block ${RESET} ${BOLD}${YELLOW} $block ${RESET} ${BOLD}${BLUE} $block ${RESET} ${BOLD}${CYAN} $block ${RESET} ${BOLD}${WHITE} $block ${RESET}
+EOF
+}
+
+pingu="$WHITE        .___.       $RESET
+$WHITE       /     \      $RESET
+$WHITE      | O _ O |     $RESET
+$WHITE      /  \_/  \     $RESET
+$WHITE    .' /     \ '.   $RESET
+$WHITE   / _|       |_ \  $RESET
+$WHITE  (_/ |       | \_) $RESET
+$WHITE      \       /     $RESET
+$WHITE     __\     /__    $RESET
+$WHITE       |_>_<_|      $RESET
+$WHITE    ~;/       \;~
+"
+case "$(echo $d)" in
+
+    *) ascii="$pingu" ;;
+
+esac
+if [[ "$1" ]]; then
+    while [[ "$1" ]]; do
+        case "$1" in
+        
+            -h|--help) echo "-v | --version                      shows petch version" && exit 0 ;;
+            -v|--version) echo "petch v1.1" && exit 0 ;;
+            *) echo "[!] Invalid option! Use --help" && exit 1 ;;
+            
+        esac
+        shift
+    done
+else
+    paste <(printf "%b" "$ascii") <(printf "%b" "$(info)") | cat
+fi
+exit 0
+info
